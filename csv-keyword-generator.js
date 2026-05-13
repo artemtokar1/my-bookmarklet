@@ -1,15 +1,11 @@
-javascript:(() => {
-
+(() => {
 
 if (document.getElementById("seo-keyword-generator")) return;
-
 
 const popup = document.createElement("div");
 popup.id = "seo-keyword-generator";
 
-
-popup.style = `
-position:fixed;
+popup.style = `position:fixed;
 top:20px;
 right:20px;
 width:620px;
@@ -24,39 +20,38 @@ font-family:Arial,sans-serif;
 display:flex;
 flex-direction:column;
 gap:14px;
-overflow:hidden;
-`;
-
+overflow:hidden;`;
 
 popup.innerHTML = `
+
 <div style="
 display:flex;
 justify-content:space-between;
 align-items:center;
 ">
 
-
-    <div style="
-        font-size:20px;
-        font-weight:bold;
-    ">
-        SEO Keyword Generator
-    </div>
-
-
-    <button id="seo-close-btn" style="
-        background:#222;
-        color:#fff;
-        border:none;
-        width:32px;
-        height:32px;
-        border-radius:8px;
-        cursor:pointer;
-        font-size:15px;
-        flex-shrink:0;
-    ">✕</button>
+```
+<div style="
+    font-size:20px;
+    font-weight:bold;
+">
+    SEO Keyword Generator
 </div>
 
+<button id="seo-close-btn" style="
+    background:#222;
+    color:#fff;
+    border:none;
+    width:32px;
+    height:32px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:15px;
+    flex-shrink:0;
+">✕</button>
+```
+
+</div>
 
 <div style="
 font-size:15px;
@@ -67,7 +62,6 @@ padding:2px 2px 0;
 Якщо бренд можна писати окремо — використовуй <b>CamelCase</b>.<br>
 Наприклад: <b>RichRoyal</b>, <b>SlotsHopper</b>, <b>GladiatorsBet</b>
 </div>
-
 
 <textarea 
 id="seo-input"
@@ -89,7 +83,6 @@ outline:none;
 font-family:Consolas, monospace;
 "></textarea>
 
-
 <button id="seo-generate-btn" style="
 height:50px;
 border:none;
@@ -101,16 +94,12 @@ cursor:pointer;
 font-size:16px;
 transition:.15s;
 ">
-Generate CSV
-</button>
+Generate CSV </button>
 `;
-
 
 document.body.appendChild(popup);
 
-
 const textarea = document.getElementById("seo-input");
-
 
 textarea.placeholder =
 "RichRoyal\n" +
@@ -127,310 +116,254 @@ textarea.placeholder =
 "https://gladiatorsbet.com/\n" +
 "https://gladiatorsbet.com/app/";
 
-
 document.getElementById("seo-close-btn").onclick = () => {
-    popup.remove();
+popup.remove();
 };
-
 
 document.getElementById("seo-generate-btn").onmouseenter = () => {
-    document.getElementById("seo-generate-btn").style.opacity = ".9";
+document.getElementById("seo-generate-btn").style.opacity = ".9";
 };
-
 
 document.getElementById("seo-generate-btn").onmouseleave = () => {
-    document.getElementById("seo-generate-btn").style.opacity = "1";
+document.getElementById("seo-generate-btn").style.opacity = "1";
 };
-
 
 function hasCasinoWord(text) {
 
+```
+text = text.toLowerCase();
 
-    text = text.toLowerCase();
+return [
+    "casino",
+    "kazino",
+    "kasyno",
+    "kaszino"
+].some(word => text.includes(word));
+```
 
-
-    return [
-        "casino",
-        "kazino",
-        "kasyno",
-        "kaszino"
-    ].some(word => text.includes(word));
 }
-
 
 function splitBrand(brand) {
 
+```
+const parts = brand.match(/[A-Z][a-z]*|\d+/g) || [];
 
-    const parts = brand.match(/[A-Z][a-z]*|\d+/g) || [];
+const compressed = parts.join("").toLowerCase();
 
+const split = parts.length > 1
+    ? parts.map(p => p.toLowerCase()).join(" ")
+    : null;
 
-    const compressed = parts.join("").toLowerCase();
+return {
+    compressed,
+    split
+};
+```
 
-
-    const split = parts.length > 1
-        ? parts.map(p => p.toLowerCase()).join(" ")
-        : null;
-
-
-    return {
-        compressed,
-        split
-    };
 }
-
 
 function getMainKeys(brand, domain) {
 
+```
+const { compressed, split } = splitBrand(brand);
 
-    const { compressed, split } = splitBrand(brand);
+const keys = [];
 
+keys.push(compressed);
 
-    const keys = [];
-
-
-    keys.push(compressed);
-
-
-    if (!hasCasinoWord(brand)) {
-        keys.push(`${compressed} casino`);
-    }
-
-
-    if (split) {
-        keys.push(split);
-    }
-
-
-    const digits = domain.replace(/\D/g, "");
-
-
-    if (digits) {
-        keys.push(`${compressed}${digits}`);
-    }
-
-
-    return [...new Set(keys)];
+if (!hasCasinoWord(brand)) {
+    keys.push(`${compressed} casino`);
 }
 
+if (split) {
+    keys.push(split);
+}
+
+const digits = domain.replace(/\D/g, "");
+
+if (digits) {
+    keys.push(`${compressed}${digits}`);
+}
+
+return [...new Set(keys)];
+```
+
+}
 
 function getMainUrl(urls) {
 
+```
+for (const url of urls) {
 
-    for (const url of urls) {
+    try {
 
+        const path = new URL(url).pathname;
 
-        try {
+        if (path === "/" || path === "") {
+            return url;
+        }
 
-
-            const path = new URL(url).pathname;
-
-
-            if (path === "/" || path === "") {
-                return url;
-            }
-
-
-        } catch(e){}
-    }
-
-
-    return urls[0];
+    } catch(e){}
 }
 
+return urls[0];
+```
+
+}
 
 document.getElementById("seo-generate-btn").onclick = () => {
 
+```
+const text = textarea.value.trim();
 
-    const text = textarea.value.trim();
+if (!text) {
+    alert("Insert data first");
+    return;
+}
 
+const lines = text
+    .split("\n")
+    .map(x => x.trim())
+    .filter(Boolean);
 
-    if (!text) {
-        alert("Insert data first");
-        return;
+const INTERNAL_PATHS = {
+    bonus: ["bonus", "offers", "promo", "promotions", "boni", "bono"],
+    app: ["app", "shortcut", "mobile-app"],
+    login: ["login", "registration-login"]
+};
+
+const brandDomainMap = {};
+
+let currentBrand = null;
+
+for (const line of lines) {
+
+    if (!line.startsWith("http")) {
+
+        currentBrand = line;
+
+        if (!brandDomainMap[currentBrand]) {
+            brandDomainMap[currentBrand] = {};
+        }
+
+        continue;
     }
 
+    if (!currentBrand) continue;
 
-    const lines = text
-        .split("\n")
-        .map(x => x.trim())
-        .filter(Boolean);
+    let domain;
 
-
-    const INTERNAL_PATHS = {
-        bonus: ["bonus", "offers", "promo", "promotions", "boni", "bono"],
-        app: ["app", "shortcut", "mobile-app"],
-        login: ["login", "registration-login"]
-    };
-
-
-    const brandDomainMap = {};
-
-
-    let currentBrand = null;
-
-
-    for (const line of lines) {
-
-
-        if (!line.startsWith("http")) {
-
-
-            currentBrand = line;
-
-
-            if (!brandDomainMap[currentBrand]) {
-                brandDomainMap[currentBrand] = {};
-            }
-
-
-            continue;
-        }
-
-
-        if (!currentBrand) continue;
-
-
-        let domain;
-
-
-        try {
-            domain = new URL(line).hostname;
-        } catch(e){
-            continue;
-        }
-
-
-        if (!brandDomainMap[currentBrand][domain]) {
-            brandDomainMap[currentBrand][domain] = [];
-        }
-
-
-        brandDomainMap[currentBrand][domain].push(line);
+    try {
+        domain = new URL(line).hostname;
+    } catch(e){
+        continue;
     }
 
+    if (!brandDomainMap[currentBrand][domain]) {
+        brandDomainMap[currentBrand][domain] = [];
+    }
 
-    const rows = [];
+    brandDomainMap[currentBrand][domain].push(line);
+}
 
+const rows = [];
 
-    for (const brand in brandDomainMap) {
+for (const brand in brandDomainMap) {
 
+    const { compressed } = splitBrand(brand);
 
-        const { compressed } = splitBrand(brand);
+    for (const domain in brandDomainMap[brand]) {
 
+        const urls = brandDomainMap[brand][domain];
 
-        for (const domain in brandDomainMap[brand]) {
+        const mainUrl = getMainUrl(urls);
 
+        const mainKeys = getMainKeys(brand, domain);
 
-            const urls = brandDomainMap[brand][domain];
+        for (const key of mainKeys) {
 
+            rows.push([
+                domain,
+                key,
+                1,
+                "main",
+                mainUrl,
+                hasCasinoWord(brand)
+                    ? brand
+                    : `${brand} Casino`,
+                10
+            ]);
+        }
 
-            const mainUrl = getMainUrl(urls);
+        const added = new Set();
 
+        for (const url of urls) {
 
-            const mainKeys = getMainKeys(brand, domain);
+            let path = "";
 
+            try {
+                path = new URL(url).pathname.toLowerCase();
+            } catch(e){}
 
-            for (const key of mainKeys) {
+            for (const group in INTERNAL_PATHS) {
 
+                const keywords = INTERNAL_PATHS[group];
 
-                rows.push([
-                    domain,
-                    key,
-                    1,
-                    "main",
-                    mainUrl,
-                    hasCasinoWord(brand)
-                        ? brand
-                        : `${brand} Casino`,
-                    10
-                ]);
-            }
+                if (keywords.some(k => path.includes(k))) {
 
+                    const internalKey =
+                        group === "login"
+                        ? `${compressed} login`
+                        : `${compressed} ${group}`;
 
-            const added = new Set();
+                    const unique = internalKey + url;
 
+                    if (added.has(unique)) continue;
 
-            for (const url of urls) {
+                    added.add(unique);
 
+                    rows.push([
+                        domain,
+                        internalKey,
+                        1,
+                        group,
+                        url,
+                        hasCasinoWord(brand)
+                            ? brand
+                            : `${brand} Casino`,
+                        10
+                    ]);
 
-                let path = "";
-
-
-                try {
-                    path = new URL(url).pathname.toLowerCase();
-                } catch(e){}
-
-
-                for (const group in INTERNAL_PATHS) {
-
-
-                    const keywords = INTERNAL_PATHS[group];
-
-
-                    if (keywords.some(k => path.includes(k))) {
-
-
-                        const internalKey =
-                            group === "login"
-                            ? `${compressed} login`
-                            : `${compressed} ${group}`;
-
-
-                        const unique = internalKey + url;
-
-
-                        if (added.has(unique)) continue;
-
-
-                        added.add(unique);
-
-
-                        rows.push([
-                            domain,
-                            internalKey,
-                            1,
-                            group,
-                            url,
-                            hasCasinoWord(brand)
-                                ? brand
-                                : `${brand} Casino`,
-                            10
-                        ]);
-
-
-                        break;
-                    }
+                    break;
                 }
             }
         }
     }
+}
 
+let csv =
+```
 
-    let csv =
 `Название проекта,Ключевое слово,Приоритет,Семантическая группа,Целевой урл,Категория семантической группы,Число поисков по Google\n`;
 
+```
+rows.forEach(row => {
+    csv += row.map(x => '"' + x + '"').join(",") + "\n";
+});
 
-    rows.forEach(row => {
-        csv += row.map(x => '"' + x + '"').join(",") + "\n";
-    });
+const blob = new Blob([csv], {
+    type: "text/csv;charset=utf-8;"
+});
 
+const a = document.createElement("a");
 
-    const blob = new Blob([csv], {
-        type: "text/csv;charset=utf-8;"
-    });
+a.href = URL.createObjectURL(blob);
 
+a.download = "final_keywords.csv";
 
-    const a = document.createElement("a");
+a.click();
+```
 
-
-    a.href = URL.createObjectURL(blob);
-
-
-    a.download = "final_keywords.csv";
-
-
-    a.click();
 };
-
 
 })();
